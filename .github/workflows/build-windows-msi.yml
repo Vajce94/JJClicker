@@ -1,0 +1,42 @@
+name: Build Windows MSI
+
+on:
+  push:
+    tags:
+      - "v*"          # spustí sa pri: git tag v1.0.0 && git push --tags
+
+jobs:
+  build-msi:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements_windows.txt
+
+      - name: Build MSI
+        run: python setup_cx_freeze.py bdist_msi
+
+      - name: Find MSI file
+        id: find_msi
+        shell: bash
+        run: |
+          MSI=$(find dist -name "*.msi" | head -1)
+          echo "msi_path=$MSI" >> $GITHUB_OUTPUT
+          echo "msi_name=$(basename $MSI)" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release and upload MSI
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "JJClicker ${{ github.ref_name }}"
+          body: "Windows MSI installer pre JJClicker ${{ github.ref_name }}"
+          files: ${{ steps.find_msi.outputs.msi_path }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

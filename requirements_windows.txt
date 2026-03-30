@@ -1,0 +1,7 @@
+# JJClicker Windows dependencies
+# Install with: pip install -r requirements_windows.txt
+
+pynput>=1.7.7
+pystray>=0.19.5
+Pillow>=10.0.0
+cx_Freeze>=6.15.0
